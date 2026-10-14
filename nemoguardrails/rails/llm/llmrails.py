@@ -1026,7 +1026,7 @@ class LLMRails(BaseGuardrails):
         # requests are made.
         self._explain_info = self._ensure_explain_info()
 
-        raw_llm_request.set(messages)
+        raw_llm_request.set(_get_llm_facing_messages(messages) if messages is not None else None)
 
         # If we have generation options, we also add them to the context
         if gen_options:
@@ -2143,6 +2143,10 @@ def _reject_tool_rail_types(rail_types: List[RailType]) -> None:
         raise RailTypeNotSupportedError(
             f"LLMRails supports input and output rails only, not {', '.join(requested_rail_type)}"
         )
+
+
+def _get_llm_facing_messages(messages: List[dict]) -> List[dict]:
+    return [msg for msg in messages if msg.get("role") not in ("context", "event")]
 
 
 def _determine_rails_from_messages(messages: List[dict]) -> Optional[dict]:
